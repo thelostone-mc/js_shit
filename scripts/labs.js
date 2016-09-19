@@ -1,3 +1,48 @@
+/*
+Object Creation
+var obj = {a:1, b:2, c:3};
+for (var prop in obj) {
+  console.log("obj." + prop + " = " + obj[prop]);
+}
+console.log(Object.keys(obj), Object.getOwnPropertyNames(obj));
+
+var adder = new Function('x','y', 'return x+y;');
+var Fruit = function(color) {
+    this.color = color;
+}
+
+Object.defineProperty(obj, 'a', {
+  value: 37,
+  writable: true,
+  enumerable: true,
+  configurable: false
+});
+
+var x = 1;
+Object.defineProperty(obj, 'b', {
+  set: function() {return x;},
+  get: function(newValue) {x = newValue;},
+  enumerable: true,
+  configurable: false
+});
+
+console.log(delete o.a);
+
+*/
+
+Fruit.prototype.color = "Yellow";
+Fruit.prototype.sweetness = 7;
+Fruit.prototype.fruitName = "Generic Fruit";
+Fruit.prototype.nativeToLand = "USA";
+
+Fruit.prototype.showName = function () {
+    console.log("This is a " + this.fruitName);
+}
+
+Fruit.prototype.nativeTo = function () {
+        console.log("Grown in:" + this.nativeToLand);
+}
+
 function warn(message) {
    console.log(["WARN: ", message].join(' '));
 }
@@ -229,3 +274,36 @@ function restrict(table, predicate) {
             return _.without(newTable, obj);
     }, table);
 }
+
+// Scope
+var globals = {};
+
+function makeBindFun(resolver) {
+    return function(k, v) {
+        var stack = globals[k] || [];
+        globals[k] = resolver(stack, v);
+        return globals;
+    }
+}
+
+var stackBinder  = makeBindFun(function(stack , v) {
+    stack.push(v);
+    return stack;
+});
+
+var stackUnbinder = makeBindFun(function(stack) {
+    stack.pop();
+    return stack;
+});
+
+var dynamicLookup = function(k) {
+    var slot = globals[k] || [];
+    return _.last(slot);
+};
+
+// Use bind to preserve scope
+var target = {
+    name: 'the right value',
+    aux: function() { return this.name; },
+    act: function() { return this.aux(); }
+};
